@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+serial.s
+mirror.gb
+global.s
+compile.bat
+comm.sav
+comm.noi
+comm.gb
+comm-semiworking.c
+comm-justonelastproblem.c
+a.ihx
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+.DS_Store
