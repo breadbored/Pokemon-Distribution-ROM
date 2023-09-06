@@ -77,8 +77,8 @@ void party_member_to_bytes(struct PartyMember *pPartyMember, uint8_t *out) {
         (uint8_t) (pPartyMember->original_trainer_id >> 8),
         (uint8_t) (pPartyMember->original_trainer_id & 0x00FF),
         (uint8_t) (pPartyMember->experience & 0x000000FF),
-        (uint8_t) (pPartyMember->experience & 0x0000FF00) >> 8,
-        (uint8_t) (pPartyMember->experience & 0x00FF0000) >> 16,
+        (uint8_t) ((pPartyMember->experience & 0x0000FF00) >> 8),
+        (uint8_t) ((pPartyMember->experience & 0x00FF0000) >> 16),
         (uint8_t) (pPartyMember->HP_ev >> 8),
         (uint8_t) (pPartyMember->HP_ev & 0x00FF),
         (uint8_t) (pPartyMember->attack_ev >> 8),
@@ -146,10 +146,10 @@ void trader_packet_to_bytes(struct TraderPacket *pTraderPacket, uint8_t *out) {
         party_member_to_bytes(&pTraderPacket->pokemon[i], poke);
 
         // Selected Pokemon Data (for listing and ordering without stats)
-        if (poke[0] != 0x00) {
-            pTraderPacket->selected_pokemon.number++;
-            pTraderPacket->selected_pokemon.pokemon[i] = poke[0];
-        }
+        // if (poke[0] != 0x00) {
+        //     pTraderPacket->selected_pokemon.number++;
+        //     pTraderPacket->selected_pokemon.pokemon[i] = poke[0];
+        // }
         
         // Full Party Data (all stats and such)
         for (size_t j = 0; j < POKE_SIZE; j++) {
@@ -262,9 +262,11 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
             } else if(trade_state == DATA_TX_RANDOM && in == 0xFD) {
                 trade_state = DATA_TX_WAIT;
                 out[0] = 0xFD;
-                (*counter)++;
+                (*counter) = 0;
         //        printf("Random data sent, wait\n");
-            } else if(trade_state == DATA_TX_WAIT && in != 0xFD && (*counter) == 0x05) {
+            } else if (trade_state == DATA_TX_WAIT && in == 0xFD) {
+                out[0] = 0x00;
+            } else if(trade_state == DATA_TX_WAIT && in != 0xFD) {
                 (*counter) = 0;
                 // send first byte
                 out[0] = DATA_BLOCK[(*counter)];
@@ -290,6 +292,7 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                 if((*counter) == 197) {
                     trade_state = TRADE_WAIT;
                 }
+                (*counter) = 0;
         //        printf("Send patch trade wait\n");
             } else if(trade_state == TRADE_WAIT && (in & 0x60) == 0x60) {
                 if (in == 0x6f) {
@@ -422,8 +425,9 @@ void main(void)
     size_t trade_counter = 0;
     trader_packet_to_bytes(&traderPacket, DATA_BLOCK);
 
-    puts("Pokemon Distribution");
-    puts("Copyright 2000");
+    puts("Poke Distribution");
+    puts("Copyright 2023");
+    puts("BreadCodes");
 
 
     int debug_last_byte = 0x00;
@@ -433,7 +437,7 @@ void main(void)
         while(_io_status == IO_RECEIVING);
         uint8_t in = _io_in; //SER_REG_DIR;
         
-        _io_out = handle_byte(in, trade_counter);
+        _io_out = handle_byte(in, &trade_counter);
         
 __asm
 	LD	A,#0x01
