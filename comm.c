@@ -421,8 +421,8 @@ void main(void)
     size_t trade_counter = 0;
     trader_packet_to_bytes(&traderPacket, DATA_BLOCK);
 
-    puts("Pokemon Distribution");
-    puts("Copyright 2000");
+    puts("Poke Distribution");
+    puts("Copyright 2023");
 
 
     int debug_last_byte = 0x00;
