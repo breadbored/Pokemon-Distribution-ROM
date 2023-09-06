@@ -262,8 +262,9 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
             } else if(trade_state == DATA_TX_RANDOM && in == 0xFD) {
                 trade_state = DATA_TX_WAIT;
                 out[0] = 0xFD;
+                (*counter)++;
         //        printf("Random data sent, wait\n");
-            } else if(trade_state == DATA_TX_WAIT && in != 0xFD) {
+            } else if(trade_state == DATA_TX_WAIT && in != 0xFD && (*counter) == 0x05) {
                 (*counter) = 0;
                 // send first byte
                 out[0] = DATA_BLOCK[(*counter)];
@@ -421,8 +422,8 @@ void main(void)
     size_t trade_counter = 0;
     trader_packet_to_bytes(&traderPacket, DATA_BLOCK);
 
-    puts("Poke Distribution");
-    puts("Copyright 2023");
+    puts("Pokemon Distribution");
+    puts("Copyright 2000");
 
 
     int debug_last_byte = 0x00;
