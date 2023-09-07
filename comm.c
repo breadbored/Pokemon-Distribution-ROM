@@ -217,11 +217,15 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                 out[0] = PKMN_CONNECTED;
                 connection_state = CONNECTED;
         //        printf("We are connected!\n");
+            } else if (in == PKMN_TRADE_CENTRE) {
+                connection_state = CONNECTED;
+                connection_state = TRADE_CENTRE;
+                out[0] = PKMN_TRADE_CENTRE;
             }
             break;
 
         case CONNECTED:
-    //        printf("Connected...\n");
+            //printf("Connected...\n");
             if(in == PKMN_CONNECTED) {
                 out[0] = PKMN_CONNECTED;
         //        printf("Confirmed connected.\n");
@@ -422,15 +426,13 @@ void main(void)
         }
     }
     
-    size_t trade_counter = 0;
     trader_packet_to_bytes(&traderPacket, DATA_BLOCK);
 
     puts("Poke Distribution");
     puts("Copyright 2023");
     puts("BreadCodes");
 
-
-    int debug_last_byte = 0x00;
+    size_t trade_counter = 0;
     while(1) {
 
         receive_byte();
@@ -438,17 +440,8 @@ void main(void)
         uint8_t in = _io_in; //SER_REG_DIR;
         
         _io_out = handle_byte(in, &trade_counter);
-        
-__asm
-	LD	A,#0x01
-	LD	(__io_status),A ; Store status
-	LD	A,#0x01
-	LDH	(0x02),A		; Use internal clock
-	LD	A,(__io_out)
-	LDH	(0x01),A		; Send data byte
-	LD	A,#0x80
-	LDH	(0x02),A		; Use internal clock
-__endasm;
+
+        // if (in == 0xD4) printf("%x %x\n", in, _io_out);
 
         while(_io_status == IO_SENDING);
         while((joypad() > 0)); // Pause output to read the screen
