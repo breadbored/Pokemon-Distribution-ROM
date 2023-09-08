@@ -18,7 +18,6 @@
 
 enum connection_state_t connection_state = NOT_CONNECTED;
 enum trade_state_t trade_state = INIT;
-uint32_t emu_var = 0x12345678;
 uint8_t INPUT_BLOCK[418];
 uint8_t DATA_BLOCK[418];
 int trade_pokemon = -1;
@@ -28,11 +27,11 @@ unsigned char name[11] = {
     pokechar_e, 
     pokechar_a, 
     pokechar_d, 
-    pokechar_B, 
+    pokechar_C, 
     pokechar_o, 
-    pokechar_r, 
-    pokechar_e, 
     pokechar_d, 
+    pokechar_e, 
+    pokechar_s, 
     pokechar_STOP_BYTE 
 };
 unsigned char nicknames[11] = {
@@ -76,9 +75,9 @@ void party_member_to_bytes(struct PartyMember *pPartyMember, uint8_t *out) {
         pPartyMember->move4,
         (uint8_t) (pPartyMember->original_trainer_id >> 8),
         (uint8_t) (pPartyMember->original_trainer_id & 0x00FF),
-        (uint8_t) (pPartyMember->experience & 0x000000FF),
-        (uint8_t) ((pPartyMember->experience & 0x0000FF00) >> 8),
         (uint8_t) ((pPartyMember->experience & 0x00FF0000) >> 16),
+        (uint8_t) ((pPartyMember->experience & 0x0000FF00) >> 8),
+        (uint8_t) (pPartyMember->experience & 0x000000FF),
         (uint8_t) (pPartyMember->HP_ev >> 8),
         (uint8_t) (pPartyMember->HP_ev & 0x00FF),
         (uint8_t) (pPartyMember->attack_ev >> 8),
@@ -207,16 +206,16 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
             // printf("NC\n");
             if(in == PKMN_MASTER) {
                 out[0] = PKMN_SLAVE;
-                printf("SLV\n");
+        //        printf("SLV\n");
             }
             else if(in == PKMN_BLANK) {
                 out[0] = PKMN_BLANK;
-                printf("BNK\n");
+        //        printf("BNK\n");
             }
             else if(in == PKMN_CONNECTED) {
                 out[0] = PKMN_CONNECTED;
                 connection_state = CONNECTED;
-                printf("CON\n");
+        //        printf("CON\n");
             }
             break;
 
@@ -224,47 +223,47 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
             //printf("Connected...\n");
             if(in == PKMN_CONNECTED) {
                 out[0] = PKMN_CONNECTED;
-                printf("CC\n");
+        //        printf("CC\n");
             }
             else if(in == PKMN_TRADE_CENTRE) {
                 connection_state = TRADE_CENTRE;
-                printf("TC\n");
+        //        printf("TC\n");
             }
             else if(in == PKMN_COLOSSEUM) {
                 connection_state = COLOSSEUM;
-                printf("COL\n");
+        //        printf("COL\n");
             }
             else if(in == PKMN_BREAK_LINK || in == PKMN_MASTER) {
                 connection_state = NOT_CONNECTED;
                 out[0] = PKMN_BREAK_LINK;
-                printf(in == PKMN_MASTER ? "PMR\n" : "PBL\n");
+        //        printf(in == PKMN_MASTER ? "PMR\n" : "PBL\n");
             } else {
                 out[0] = in;
                 // printf("echoing back after connected: %x\n", in);
-                printf("EC1\n");
+        //        printf("EC1\n");
             }
             break;
 
         case TRADE_CENTRE:
-            printf("TCC\n");
+    //        printf("TCC\n");
             if(trade_state == INIT && in == 0x00) {
                 trade_state = READY;
                 out[0] = 0x00;
-                printf("I\n");
+        //        printf("I\n");
             } else if(trade_state == READY && in == 0xFD) {
                 trade_state = FIRST_DETECTED_WAIT;
                 out[0] = 0xFD;
-                printf("R\n");
+        //        printf("R\n");
             } else if(trade_state == FIRST_DETECTED_WAIT && in != 0xFD) {
                 // random data of slave is ignored.
                 out[0] = in;
                 trade_state = DATA_TX_RANDOM;
-                printf("DRD\n");
+        //        printf("DRD\n");
             } else if(trade_state == DATA_TX_RANDOM && in == 0xFD) {
                 trade_state = DATA_TX_WAIT;
                 out[0] = 0xFD;
                 (*counter) = 0;
-                printf("RDS\n");
+        //        printf("RDS\n");
             } else if (trade_state == DATA_TX_WAIT && in == 0xFD) {
                 out[0] = 0x00;
             } else if(trade_state == DATA_TX_WAIT && in != 0xFD) {
@@ -274,7 +273,7 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                 INPUT_BLOCK[(*counter)] = in;
                 trade_state = DATA_TX;
                 (*counter)++;
-                printf("SD1\n");
+        //        printf("SD1\n");
             } else if(trade_state == DATA_TX) {
                 out[0] = DATA_BLOCK[(*counter)];
                 INPUT_BLOCK[(*counter)] = in;
@@ -282,11 +281,11 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                 if((*counter) == 418) {
                     trade_state = DATA_TX_PATCH;
                 }
-                printf("SD2\n");
+        //        printf("SD2\n");
             } else if(trade_state == DATA_TX_PATCH && in == 0xFD) {
                 (*counter) = 0;
                 out[0] = 0xFD;
-                printf("SP\n");
+        //        printf("SP\n");
             } else if(trade_state == DATA_TX_PATCH && in != 0xFD) {
                 out[0] = in;
                 (*counter)++;
@@ -294,21 +293,21 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                     trade_state = TRADE_WAIT;
                 }
                 (*counter) = 0;
-                printf("SPW\n");
+        //        printf("SPW\n");
             } else if(trade_state == TRADE_WAIT && (in & 0x60) == 0x60) {
                 if (in == 0x6f) {
                     trade_state = READY;
                     out[0] = 0x6f;
-                    printf("MR\n");
+            //        printf("MR\n");
                 } else {
                     out[0] = 0x60; // first pokemon
                     trade_pokemon = in - 0x60;
-                    printf("MFP\n");
+            //        printf("MFP\n");
                 }
             } else if(trade_state == TRADE_WAIT && in == 0x00) {
                 out[0] = 0;
                 trade_state = TRADE_DONE;
-                printf("TWD\n");
+        //        printf("TWD\n");
                 // printf("Sent the Gameboy:\n");
                 // printf("Gameboy Sent:\n");
                 // printf("Trade done\n");
@@ -317,28 +316,28 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                 if (in  == 0x61) {
                     trade_pokemon = -1;
                     trade_state = TRADE_WAIT;
-                    printf("TDW\n");
+            //        printf("TDW\n");
                 } else {
                     trade_state = DONE;
-                    printf("TD\n");
+            //        printf("TD\n");
                 }
             } else if(trade_state == DONE && in == 0x00) {
                 out[0] = 0;
                 trade_state = INIT;
-                printf("DRI\n");
+        //        printf("DRI\n");
             } else {
                 out[0] = in;
-                printf("EC2\n");
+        //        printf("EC2\n");
             }
             break;
         
         default:
             out[0] = in;
-            printf("EC3\n");
+    //        printf("EC3\n");
             break;
     }
     
-    printf("        %x %x\n", in, out[0]);
+    // printf("        %x %x\n", in, out[0]);
 
     return out[0];
 }
@@ -378,7 +377,7 @@ void main(void)
         pPartyMember->move2 = PSYWAVE;
         pPartyMember->move3 = PSYCHIC;
         pPartyMember->move4 = FLY;
-        pPartyMember->original_trainer_id = 0xFFDE;//0xA455; // In decimal, these are the funny numbers
+        pPartyMember->original_trainer_id = 0xA455; // In decimal, these are the funny numbers
 
         // -   Experience is complicated. You must look up the Pokemon you are trying to trade
         //      in the following table and apply the experience points that match the level.
@@ -431,6 +430,8 @@ void main(void)
     puts("Poke Distribution");
     puts("Copyright 2023");
     puts("BreadCodes");
+    puts("");
+    puts("Reset: Press Button");
 
     size_t trade_counter = 0;
     while(1) {
@@ -438,9 +439,23 @@ void main(void)
         
         _io_out = handle_byte(in, &trade_counter);
 
+        // No-Op loop to delay the bytes being sent.
+        // We do this because the serial interface halts operations on 
+        // the other Gameboy and freezes the game, so we need to give it
+        // time to think.
+        for (int i = 0; i < 500; i++) {
+            __asm
+                NOP
+            __endasm;
+        }
+
         trade_byte();
 
         while(_io_status == IO_RECEIVING || _io_status == IO_SENDING);
-        while((joypad() > 0)); // Pause output to read the screen
+        
+        if (joypad() > 0) {
+            connection_state = NOT_CONNECTED;
+            trade_state = INIT;
+        }
     }
 }
