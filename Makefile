@@ -1,4 +1,5 @@
-CC	= /opt/gbdk/bin/lcc -Wa-l -Wl-m -Wl-j -DUSE_SFR_FOR_REG=1
+# CC	= /opt/gbdk/bin/lcc -Wa-l -Wl-m -Wl-j
+CC = /Users/jasoncarpenter/gbdk-2020/build/gbdk/bin/lcc -Wa-l -Wl-m -Wl-j
 
 BINS	= comm.gb
 
