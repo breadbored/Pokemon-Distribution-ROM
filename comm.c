@@ -421,7 +421,7 @@ void main(void)
             __endasm;
         }
 
-        trade_byte();
+        trade_byte_primary();
 
         while(_io_status == IO_RECEIVING || _io_status == IO_SENDING);
         
