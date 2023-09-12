@@ -51,7 +51,7 @@ unsigned char nicknames[11] = {
 
 typedef struct TraderPacket {
     // Name must not exceed 10 characters + 1 STOP_BYTE
-    // Any leftover space after must be filled with STOP_BYTE
+    // Any leftover space must be filled with STOP_BYTE
     unsigned char name[11];
     struct SelectedPokemon selected_pokemon;
     struct PartyMember pokemon[6];
