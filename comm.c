@@ -40,18 +40,18 @@ unsigned char nicknames[11] = {
     pokechar_E, 
     pokechar_W, 
     pokechar_STOP_BYTE, 
-    pokechar_NULL_BYTE, 
-    pokechar_NULL_BYTE, 
-    pokechar_NULL_BYTE, 
-    pokechar_NULL_BYTE, 
-    pokechar_NULL_BYTE, 
-    pokechar_NULL_BYTE, 
-    pokechar_NULL_BYTE, 
+    pokechar_STOP_BYTE, 
+    pokechar_STOP_BYTE, 
+    pokechar_STOP_BYTE, 
+    pokechar_STOP_BYTE, 
+    pokechar_STOP_BYTE, 
+    pokechar_STOP_BYTE, 
+    pokechar_STOP_BYTE, 
 };
 
 typedef struct TraderPacket {
     // Name must not exceed 10 characters + 1 STOP_BYTE
-    // Any leftover space after STOP_BYTE must be filled with NULL_BYTE
+    // Any leftover space must be filled with STOP_BYTE
     unsigned char name[11];
     struct SelectedPokemon selected_pokemon;
     struct PartyMember pokemon[6];
