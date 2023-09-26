@@ -421,7 +421,18 @@ void main(void)
             __endasm;
         }
 
-        trade_byte_primary();
+        //trade_byte_primary();
+        // See https://github.com/gbdk-2020/gbdk-2020/pull/577
+        __asm
+			LD	A,#0x02         ; .IO_RECEIVING
+			LD	(__io_status),A ; Store status
+			LD	A,#0x01
+			LDH	(0x02),A		; (.SC) Use external clock
+			LD	A,(__io_out)
+			LDH	(0x01),A		; (.SB) Send __io_out byte
+			LD	A,#0x81
+			LDH	(0x02),A		; (.SC) Use external clock
+		__endasm;
 
         while(_io_status == IO_RECEIVING || _io_status == IO_SENDING);
         
