@@ -278,7 +278,6 @@ uint8_t handle_byte(uint8_t in, size_t *counter) {
                 if((*counter) == 197) {
                     trade_state = TRADE_WAIT;
                 }
-                (*counter) = 0;
             } else if(trade_state == TRADE_WAIT && (in & 0x60) == 0x60) {
                 if (in == 0x6f) {
                     trade_state = READY;
@@ -402,8 +401,6 @@ void main(void)
     puts("Poke Distribution");
     puts("Copyright 2023");
     puts("BreadCodes");
-    puts("");
-    puts("Reset: Press Button");
 
     size_t trade_counter = 0;
     while(1) {
@@ -435,10 +432,5 @@ void main(void)
         __endasm;
 
         while(_io_status == IO_RECEIVING || _io_status == IO_SENDING);
-        
-        if (joypad() > 0) {
-            connection_state = NOT_CONNECTED;
-            trade_state = INIT;
-        }
     }
 }
